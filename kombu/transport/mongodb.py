@@ -107,6 +107,7 @@ class Channel(virtual.Channel):
         if not conninfo.hostname:
             conninfo.hostname = DEFAULT_HOST
 
+        options = None
         for part in conninfo.hostname.split('/'):
             if not hostname:
                 hostname = 'mongodb://' + part
@@ -118,10 +119,11 @@ class Channel(virtual.Channel):
                 # to the mongodb connection. Right now
                 # it is not permitted by kombu
                 dbname, options = part.split('?')
-                hostname += '/?' + options
 
-        hostname = "%s/%s" % (hostname, dbname in [None, "/"] and "admin" \
-                                                                    or dbname)
+        hostname = "%s/%s" % (hostname, dbname in [None, "/"] and "admin" or dbname)
+        if options:
+            hostname += '?'.join(('/' if not dbname else '', options))
+
         if not dbname or dbname == "/":
             dbname = "kombu_default"
 
